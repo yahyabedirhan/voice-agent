@@ -79,7 +79,7 @@ pnpm --version
 uv --version
 ```
 
-Expected versions currently available: Node 26.1.0, pnpm 11.8.0, and uv 0.11.14.
+Expected project versions: Node 24.19.0, pnpm 11.8.0, and uv 0.11.14. Node 24 is required because the current Pyodide launcher used by pywrangler is incompatible with Node 26.
 
 - [ ] **Step 2: Generate the Client-side application**
 
@@ -121,7 +121,7 @@ Create root `package.json` with these scripts:
 }
 ```
 
-Create `.node-version` containing `26.1.0`.
+Create `.node-version` containing `24.19.0`.
 
 - [ ] **Step 4: Create Backend package manifests**
 
@@ -228,7 +228,7 @@ Create `apps/backend/src/worker.py`:
 ```python
 from workers import WorkerEntrypoint
 
-from src.app import app
+from app import app
 
 
 class Default(WorkerEntrypoint):

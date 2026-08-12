@@ -9,6 +9,9 @@ coverage/
 .wrangler/
 .dev.vars
 .venv/
+.venv-workers/
+python_modules/
+pylock.toml
 __pycache__/
 .pytest_cache/
 .ruff_cache/
