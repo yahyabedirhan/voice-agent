@@ -107,6 +107,8 @@ quality gate.
 ## Package tooling
 
 - pnpm manages Client-side dependencies and repository-level JavaScript tools.
+- Node.js 24 is used because the current pywrangler Pyodide launcher is not
+  compatible with Node.js 26.
 - uv manages Backend Python dependencies.
 - pywrangler runs and deploys the Python Worker.
 - Supabase CLI runs the local Database and applies production migrations from
