@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-12
+- Scope: Version 1
 
 ## Context
 
@@ -9,7 +10,7 @@ The project needs a browser-based platform for multiple task-oriented voice
 agents. A user selects an agent and completes a domain-specific task through a
 voice-first conversation. Developers need provider-side transcripts and enough
 application metadata to correlate conversations and business events. Our
-application does not need to retain audio or transcripts in v1.
+application does not need to retain audio or transcripts.
 
 The project is a demo and learning exercise. Simplicity and speed of delivery
 matter more than scale or owning every layer of the voice stack.
@@ -22,7 +23,7 @@ We compared three approaches:
 
 ## Decision
 
-Use ElevenLabs Agents as the managed voice runtime for v1.
+Use ElevenLabs Agents as the managed voice runtime.
 
 The browser will connect to ElevenLabs using its React SDK and WebRTC support.
 FastAPI will act as the application control plane: it will expose the enabled
@@ -30,9 +31,9 @@ catalog, select the configured private agent, issue protected conversation
 credentials, receive post-conversation webhooks, and persist application
 records.
 
-The agent catalog will be code-defined in FastAPI for v1. Supabase/PostgreSQL
+The agent catalog will be code-defined in FastAPI. Supabase/PostgreSQL
 will store application session metadata and business events. ElevenLabs will be
-the v1 source of truth for provider-side conversation history and transcripts,
+the source of truth for provider-side conversation history and transcripts,
 subject to retention settings that must be reviewed before deployment.
 
 ## Why
@@ -50,12 +51,12 @@ build correctly:
 - post-conversation analysis and evaluation;
 - testing, analytics, and OpenTelemetry trace export.
 
-Purchasing a managed service lets us spend the first version on product and
-domain behavior: selecting an agent, defining two different task-oriented
+Purchasing a managed service lets us spend time on product and domain behavior:
+selecting an agent, defining two different task-oriented
 conversations, connecting business capabilities, and learning how voice agents
 are configured and evaluated.
 
-## What we do not need to build in v1
+## What we do not need to build
 
 - A browser-to-FastAPI audio streaming protocol.
 - A FastAPI-to-model realtime audio connection.

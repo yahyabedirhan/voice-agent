@@ -3,18 +3,21 @@
 A demo platform for browser-based, task-oriented voice agents. Users choose an
 agent from a small catalog and have an anonymous, voice-first conversation.
 
-The project is inspired by the operating model of vertical AI-agent companies,
-but its v1 scope is intentionally narrow: learn how managed voice agents fit
+The project is inspired by the operating model of vertical AI-agent companies.
+Its initial scope is intentionally narrow: learn how managed voice agents fit
 into a product architecture and validate the platform with two substantially
 different agents.
 
-## V1 agents
+Unless a document says otherwise, the requirements and architecture in this
+repository describe Version 1.
+
+## Initial agents
 
 - Drive-through ordering agent
 - House-painting service agent
 
-These are independent agents. V1 does not introduce shared agent types,
-inheritance, or a generic agent builder.
+These are independent agents. The platform does not introduce shared agent
+types, inheritance, or a generic agent builder.
 
 ## Product boundary
 
@@ -27,7 +30,7 @@ inheritance, or a generic agent builder.
 - FastAPI controls which private ElevenLabs agents may start new sessions.
 - Supabase stores application session metadata and business events, not audio or
   transcripts.
-- No custom administrator interface is included in v1.
+- No custom administrator interface is included.
 
 ## Accepted decisions
 
@@ -36,8 +39,8 @@ inheritance, or a generic agent builder.
 
 ## Design checkpoint
 
-- [V1 product requirements](docs/requirements/v1-product-requirements.md)
-- [V1 platform architecture and session lifecycle](docs/architecture/v1-platform-foundation.md)
+- [Product requirements](docs/requirements/v1-product-requirements.md)
+- [Platform architecture and session lifecycle](docs/architecture/v1-platform-foundation.md)
 
 ## Active research
 

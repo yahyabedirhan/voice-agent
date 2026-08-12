@@ -1,10 +1,12 @@
-# V1 Platform Architecture and Session Lifecycle
+# Platform Architecture and Session Lifecycle
 
 - Status: Approved checkpoint
 - Date: 2026-08-12
+- Scope: Version 1
 
 This document covers the platform foundation agreed so far. It does not define
-the internal behavior or tool set of either v1 agent.
+the internal behavior or tool set of either agent. All sections below apply to
+the stated scope unless explicitly noted otherwise.
 
 ## System boundary
 
@@ -76,11 +78,11 @@ FastAPI is not in the realtime media path.
   sessions.
 - Store the ElevenLabs conversation ID once known.
 - Store lifecycle timestamps, statuses, and application-owned events.
-- Exclude transcripts and audio from the v1 data model.
+- Exclude transcripts and audio from the data model.
 
 ### Administrative surfaces
 
-V1 does not have a custom administrator application. Developers use:
+The platform does not have a custom administrator application. Developers use:
 
 - the Python service to modify catalog metadata and enabled switches;
 - the ElevenLabs dashboard for agent configuration, transcripts, and provider
@@ -172,7 +174,7 @@ sequenceDiagram
 
 ## Access-control behavior
 
-- Both deployed v1 ElevenLabs agents are private.
+- Both deployed ElevenLabs agents are private.
 - The ElevenLabs API key exists only in FastAPI's server environment.
 - Anonymous access does not bypass FastAPI; every new call needs a token issued
   through the control plane.
@@ -192,7 +194,7 @@ ElevenLabs post-call webhooks provide a later reconciliation path. The payload
 can contain the provider conversation ID, application correlation metadata,
 status, duration, termination metadata, transcript, tool activity, and analysis.
 FastAPI stores only the identifiers and application-required metadata. It does
-not store the transcript or audio in v1.
+not store the transcript or audio.
 
 ## Deferred follow-on design
 

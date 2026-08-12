@@ -1,10 +1,13 @@
-# V1 Product Requirements
+# Product Requirements
 
 - Status: Approved checkpoint
 - Date: 2026-08-12
+- Scope: Version 1
 
 This document records the product requirements agreed so far. Detailed agent
 behavior and tool architecture are a separate, subsequent design phase.
+All requirements, exclusions, and success criteria below apply to the stated
+scope unless a section explicitly says otherwise.
 
 ## Goal
 
@@ -15,13 +18,15 @@ substantially.
 
 ## Required agents
 
-V1 must include at least two fully functional, independently defined agents:
+The release must include at least two fully functional, independently defined
+agents:
 
 1. A drive-through ordering agent.
 2. A house-painting service agent.
 
-Each agent is a flat entry in the catalog. Even when agents share concepts, v1
-will not introduce agent types, inheritance, or reusable domain workflows.
+Each agent is a flat entry in the catalog. Even when agents share concepts, the
+design will not introduce agent types, inheritance, or reusable domain
+workflows.
 Shared behavior may be extracted later only after concrete duplication makes
 the correct abstraction visible.
 
@@ -58,7 +63,7 @@ checkpoint. They will be designed after the overall architecture is approved.
 
 ## Administrator and developer requirements
 
-- A custom administrator interface is not required in v1.
+- A custom administrator interface is not required.
 - Developers can enable or disable catalog agents in the Python service.
 - Developers inspect transcripts and conversation history in ElevenLabs.
 - Developers inspect application sessions and business events in Supabase.
@@ -69,7 +74,7 @@ checkpoint. They will be designed after the overall architecture is approved.
 
 ## Data requirements
 
-### ElevenLabs owns in v1
+### ElevenLabs owns
 
 - Provider conversation history
 - Transcripts
@@ -77,7 +82,7 @@ checkpoint. They will be designed after the overall architecture is approved.
 - Any provider-retained audio, governed by configured ElevenLabs retention
   settings
 
-### The application owns in v1
+### The application owns
 
 - Anonymous application session ID
 - Selected stable application agent ID
@@ -86,7 +91,7 @@ checkpoint. They will be designed after the overall architecture is approved.
 - Application-specific business events and structured outcomes produced by
   agent capabilities
 
-The application does not copy transcripts or audio into Supabase in v1. A
+The application does not copy transcripts or audio into Supabase. A
 post-call webhook may contain transcript data in transit, but the application
 extracts only required identifiers and metadata and does not persist that
 transcript.
@@ -107,7 +112,7 @@ transcript.
 - Concrete third-party fulfillment, POS, or appointment integrations until the
   corresponding agent capability is designed
 
-## V1 success criteria
+## Success criteria
 
 - Both agents appear as independent catalog entries.
 - An anonymous user can start and end a browser voice session with either

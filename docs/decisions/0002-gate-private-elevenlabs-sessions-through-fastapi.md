@@ -2,17 +2,18 @@
 
 - Status: Accepted
 - Date: 2026-08-12
+- Scope: Version 1
 
 ## Context
 
-The v1 web application is anonymous, but ElevenLabs usage consumes limited paid
+The web application is anonymous, but ElevenLabs usage consumes limited paid
 minutes. If agents are public, a browser can start them directly with an agent
 ID and bypass application-level controls. The platform also needs a quick way
 to allow or block new sessions for an individual agent.
 
 ## Decision
 
-Deploy both v1 ElevenLabs agents as private agents. FastAPI will be the admission
+Deploy both ElevenLabs agents as private agents. FastAPI will be the admission
 control layer for every new voice session.
 
 The Python service will own a flat, code-defined registry containing each
