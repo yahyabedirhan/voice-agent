@@ -1,89 +1,76 @@
 # Project Initialization Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Create a locally runnable monorepo with a placeholder Client-side, a placeholder Backend, local Database scaffolding, and production deployment configuration that becomes automatic after the required external accounts are connected.
+**Goal:** Create a locally runnable monorepo with placeholder Client-side and Backend applications, local Database scaffolding, and deployment configuration ready to connect to production accounts.
 
-**Architecture:** Client-side and Backend remain independently buildable and deployable under `apps/`. Client-side calls one public Backend health endpoint so local and deployed connectivity can be verified without implementing agent or session behavior. The root `supabase/` directory contains local Database configuration, while a deployment-only GitHub Actions workflow applies production migrations after relevant changes merge to `main`.
+**Architecture:** Client-side and Backend live under `apps/` and remain independently deployable. Client-side calls a public Backend health endpoint only to prove end-to-end connectivity. The Database has local Supabase configuration and a deployment-only migration workflow, but no application schema.
 
-**Tech Stack:** React, Vite, TypeScript, Tailwind CSS, TanStack Query, Redux Toolkit, pnpm, Python 3.12, FastAPI, Pydantic, uv, Cloudflare Python Workers, pywrangler, Supabase CLI, GitHub Actions.
+**Tech Stack:** React, Vite, TypeScript, shadcn/ui, Tailwind CSS, TanStack Query, Redux Toolkit, pnpm, Python 3.12, FastAPI, Pydantic, uv, Cloudflare Python Workers, pywrangler, Supabase CLI, GitHub Actions.
 
-## Global Constraints
+## Global constraints
 
-- Use the monorepo layout `apps/client`, `apps/backend`, and `supabase`.
-- Deploy Client-side with Cloudflare Workers Static Assets.
-- Deploy Backend with Cloudflare Python Workers and FastAPI through the ASGI adapter.
-- Keep Client-side and Backend deployment triggers independent and path-aware.
-- Use only local development and production; do not add staging or custom domains.
-- Do not add agent catalog, session admission, ElevenLabs, tools, transcripts, authentication, or business-domain behavior.
-- Do not add automated tests to deployment automation; local tests and build verification remain required.
-- Do not initialize shadcn/ui until the user supplies the preset.
-- Do not create or connect external Cloudflare, Supabase, GitHub, or ElevenLabs resources without the user's account choices and authorization.
-- Use `docs/plans`, not the Superpowers default `docs/superpowers/plans`.
+- Use `apps/client`, `apps/backend`, and `supabase`.
+- Do not implement agents, sessions, ElevenLabs, tools, authentication, transcripts, or domain behavior.
+- Do not add tests for placeholder logic. Business behavior introduced later will use TDD.
+- Do not run tests in deployment automation.
+- Apply the supplied shadcn preset with `pnpm dlx shadcn@latest apply --preset b7C9wSzj6`.
+- Do not create a custom global stylesheet; keep the stylesheet produced and managed by the Tailwind/shadcn setup.
+- Deploy Client-side and Backend independently to Cloudflare Workers.
+- Use only local development and production.
+- The user creates the GitHub repository and Supabase project.
+- External production resources are not created until the user supplies the account connection.
 
 ---
 
-## File map
+## Target file structure
 
 ```text
 .
-├── .github/workflows/deploy-database.yml  # Production migration automation only
-├── .gitignore                             # Generated files, local secrets, tool state
-├── .node-version                          # Client-side Node runtime
-├── package.json                           # Root development commands and CLI dependencies
-├── pnpm-lock.yaml                         # Reproducible JavaScript dependency graph
-├── pnpm-workspace.yaml                    # Monorepo package boundaries
-├── README.md                              # Local setup and external deployment checklist
+├── .github/workflows/deploy-database.yml
+├── .gitignore
+├── .node-version
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ├── apps/
 │   ├── client/
-│   │   ├── .env.example                   # Local Backend URL contract
-│   │   ├── package.json                   # Client commands and dependencies
-│   │   ├── vite.config.ts                 # React, Tailwind, test environment
-│   │   ├── wrangler.jsonc                 # Static Assets deployment
+│   │   ├── .env.example
+│   │   ├── components.json
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   ├── wrangler.jsonc
 │   │   └── src/
-│   │       ├── app/App.tsx                # Placeholder system-status screen
-│   │       ├── app/App.test.tsx           # Observable Client-side behavior
-│   │       ├── app/providers.tsx           # Query and Redux providers
-│   │       ├── lib/backend.ts             # Typed Backend health request
-│   │       ├── store/index.ts              # Empty Redux store foundation
-│   │       ├── main.tsx                    # Browser entrypoint
-│   │       └── styles.css                  # Tailwind import and placeholder theme
+│   │       ├── app/App.tsx
+│   │       ├── app/providers.tsx
+│   │       ├── lib/backend.ts
+│   │       ├── store/index.ts
+│   │       ├── main.tsx
+│   │       └── index.css
 │   └── backend/
-│       ├── .python-version                # Python 3.12 runtime
-│       ├── package.json                   # Wrangler CLI for Worker tooling
-│       ├── pyproject.toml                  # Runtime and local verification dependencies
-│       ├── uv.lock                         # Reproducible Python dependency graph
-│       ├── wrangler.jsonc                 # Python Worker deployment
-│       ├── src/app.py                      # FastAPI application and health contract
-│       ├── src/worker.py                   # Cloudflare ASGI adapter only
-│       └── tests/test_health.py            # Backend health behavior
-└── supabase/
-    ├── config.toml                         # Local Supabase services
-    ├── migrations/README.md                # Migration ownership, no schema yet
-    └── seed.sql                            # Empty local seed entrypoint
+│       ├── .python-version
+│       ├── package.json
+│       ├── pyproject.toml
+│       ├── uv.lock
+│       ├── wrangler.jsonc
+│       └── src/
+│           ├── __init__.py
+│           ├── app.py
+│           └── worker.py
+├── supabase/
+│   ├── config.toml
+│   ├── migrations/README.md
+│   └── seed.sql
+└── README.md
 ```
 
-### Task 1: Establish the monorepo toolchain
+### Task 1: Initialize the monorepo toolchains
 
-**Files:**
-- Create: `.gitignore`
-- Create: `.node-version`
-- Create: `package.json`
-- Create: `pnpm-workspace.yaml`
-- Generate: `pnpm-lock.yaml`
-- Generate: `apps/client/package.json` and the standard Vite TypeScript scaffold
-- Create: `apps/backend/.python-version`
-- Create: `apps/backend/package.json`
-- Create: `apps/backend/pyproject.toml`
-- Generate: `apps/backend/uv.lock`
+**Files:** root workspace files, generated Vite application, Backend package manifests.
 
-**Interfaces:**
-- Consumes: the repository layout approved in the platform design.
-- Produces: root commands `pnpm dev`, `pnpm dev:client`, `pnpm dev:backend`, `pnpm build`, and `pnpm test`; independently installable Client-side and Backend packages.
+**Produces:** root commands for local development and independently installable application packages.
 
-- [ ] **Step 1: Confirm the workspace is clean and record tool versions**
-
-Run:
+- [ ] **Step 1: Verify the starting state**
 
 ```bash
 git status --short
@@ -92,19 +79,15 @@ pnpm --version
 uv --version
 ```
 
-Expected: clean status; Node 26.x, pnpm 11.x, and uv 0.11.x are available.
+Expected versions currently available: Node 26.1.0, pnpm 11.8.0, and uv 0.11.14.
 
-- [ ] **Step 2: Generate the React TypeScript scaffold**
-
-Run:
+- [ ] **Step 2: Generate the Client-side application**
 
 ```bash
 pnpm create vite apps/client --template react-ts
 ```
 
-Expected: Vite creates only `apps/client`; remove its generated demo assets when Task 3 replaces the page.
-
-- [ ] **Step 3: Add root workspace configuration**
+- [ ] **Step 3: Create the root workspace**
 
 Create `pnpm-workspace.yaml`:
 
@@ -114,7 +97,7 @@ packages:
   - apps/backend
 ```
 
-Create root `package.json`:
+Create root `package.json` with these scripts:
 
 ```json
 {
@@ -126,7 +109,9 @@ Create root `package.json`:
     "dev:client": "pnpm --dir apps/client dev",
     "dev:backend": "uv run --directory apps/backend pywrangler dev",
     "build": "pnpm --dir apps/client build",
-    "test": "pnpm --dir apps/client test && uv run --directory apps/backend pytest"
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status"
   },
   "devDependencies": {
     "concurrently": "latest",
@@ -136,7 +121,11 @@ Create root `package.json`:
 }
 ```
 
-Create `.node-version` containing `26.1.0` and `apps/backend/.python-version` containing `3.12`.
+Create `.node-version` containing `26.1.0`.
+
+- [ ] **Step 4: Create Backend package manifests**
+
+Create `apps/backend/.python-version` containing `3.12`.
 
 Create `apps/backend/package.json`:
 
@@ -154,31 +143,6 @@ Create `apps/backend/package.json`:
 }
 ```
 
-- [ ] **Step 4: Add repository ignore rules**
-
-Create `.gitignore` covering:
-
-```gitignore
-node_modules/
-dist/
-.vite/
-coverage/
-.env
-.env.*
-!.env.example
-.wrangler/
-.dev.vars
-.venv/
-__pycache__/
-.pytest_cache/
-.ruff_cache/
-*.pyc
-supabase/.branches/
-supabase/.temp/
-```
-
-- [ ] **Step 5: Declare Backend dependencies**
-
 Create `apps/backend/pyproject.toml`:
 
 ```toml
@@ -194,20 +158,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "httpx",
-  "pytest",
   "workers-py",
   "workers-runtime-sdk",
 ]
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
 ```
 
-- [ ] **Step 6: Install and lock dependencies**
+- [ ] **Step 5: Add ignore rules and install dependencies**
 
-Run:
+Ignore Node, Vite, Wrangler, uv, Python cache, local environment, and Supabase temporary files. Preserve `.env.example` files.
 
 ```bash
 pnpm add -Dw concurrently supabase wrangler
@@ -217,65 +175,22 @@ uv lock --directory apps/backend
 uv sync --directory apps/backend
 ```
 
-Expected: `pnpm-lock.yaml`, `apps/backend/uv.lock`, and a local Backend environment are created without dependency resolution errors.
-
-- [ ] **Step 7: Commit the toolchain foundation**
+- [ ] **Step 6: Commit the toolchain foundation**
 
 ```bash
-git add .gitignore .node-version package.json pnpm-workspace.yaml pnpm-lock.yaml apps/client apps/backend/.python-version apps/backend/package.json apps/backend/pyproject.toml apps/backend/uv.lock
+git add .gitignore .node-version package.json pnpm-workspace.yaml pnpm-lock.yaml apps/client apps/backend
 git commit -m "chore: initialize monorepo toolchains"
 ```
 
-### Task 2: Add the placeholder Backend with TDD
+### Task 2: Add the placeholder Backend
 
-**Files:**
-- Create: `apps/backend/tests/test_health.py`
-- Create: `apps/backend/src/__init__.py`
-- Create: `apps/backend/src/app.py`
-- Create: `apps/backend/src/worker.py`
-- Create: `apps/backend/wrangler.jsonc`
+**Files:** `apps/backend/src/*`, `apps/backend/wrangler.jsonc`.
 
-**Interfaces:**
-- Consumes: FastAPI and Pydantic from Task 1.
-- Produces: `GET /health -> 200 {"status":"ok","service":"backend"}` and Cloudflare's `Default.fetch(request)` entrypoint.
+**Produces:** `GET /health -> 200 {"status":"ok","service":"backend"}` and a Cloudflare Python Worker entrypoint.
 
-- [ ] **Step 1: Write the failing health contract test**
+- [ ] **Step 1: Create the FastAPI application**
 
-Create `apps/backend/tests/test_health.py`:
-
-```python
-from fastapi.testclient import TestClient
-
-from src.app import app
-
-
-client = TestClient(app)
-
-
-def test_health_reports_backend_is_ready() -> None:
-    response = client.get("/health")
-
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "backend"}
-```
-
-This test catches a missing route, wrong status code, or broken response contract.
-
-- [ ] **Step 2: Run the test and verify RED**
-
-Run:
-
-```bash
-uv run --directory apps/backend pytest tests/test_health.py -v
-```
-
-Expected: collection fails because `src.app` does not exist.
-
-- [ ] **Step 3: Implement the minimal FastAPI application**
-
-Create `apps/backend/src/__init__.py` as an empty package marker.
-
-Create `apps/backend/src/app.py`:
+Create an empty `apps/backend/src/__init__.py` and `apps/backend/src/app.py`:
 
 ```python
 from typing import Literal
@@ -304,19 +219,9 @@ async def health() -> HealthResponse:
     return HealthResponse(status="ok", service="backend")
 ```
 
-The wildcard origin is acceptable only for this public placeholder endpoint. Replace it before adding credential-bearing session endpoints.
+The wildcard CORS policy is limited to this public placeholder. Revisit it before credential-bearing endpoints are introduced.
 
-- [ ] **Step 4: Run the test and verify GREEN**
-
-Run:
-
-```bash
-uv run --directory apps/backend pytest tests/test_health.py -v
-```
-
-Expected: one test passes.
-
-- [ ] **Step 5: Add the Cloudflare ASGI adapter and deployment config**
+- [ ] **Step 2: Create the Cloudflare ASGI adapter**
 
 Create `apps/backend/src/worker.py`:
 
@@ -333,6 +238,8 @@ class Default(WorkerEntrypoint):
         return await asgi.fetch(app, request.js_object, self.env)
 ```
 
+- [ ] **Step 3: Configure the Python Worker**
+
 Create `apps/backend/wrangler.jsonc`:
 
 ```jsonc
@@ -341,19 +248,14 @@ Create `apps/backend/wrangler.jsonc`:
   "name": "voice-agent-backend",
   "main": "src/worker.py",
   "compatibility_date": "2026-08-12",
-  "compatibility_flags": [
-    "python_workers",
-    "python_dedicated_snapshot"
-  ],
-  "observability": {
-    "enabled": true
-  }
+  "compatibility_flags": ["python_workers", "python_dedicated_snapshot"],
+  "observability": { "enabled": true }
 }
 ```
 
-- [ ] **Step 6: Start Backend and check the real HTTP boundary**
+- [ ] **Step 4: Verify the Backend over HTTP**
 
-Run `pnpm dev:backend`, then from another shell run:
+Start `pnpm dev:backend`, then run:
 
 ```bash
 curl --fail --silent http://localhost:8787/health
@@ -365,109 +267,38 @@ Expected:
 {"status":"ok","service":"backend"}
 ```
 
-- [ ] **Step 7: Commit Backend foundation**
+- [ ] **Step 5: Commit the Backend**
 
 ```bash
 git add apps/backend
 git commit -m "feat: add placeholder backend worker"
 ```
 
-### Task 3: Add the placeholder Client-side with TDD
+### Task 3: Configure shadcn and add the placeholder Client-side
 
-**Files:**
-- Modify: `apps/client/package.json`
-- Modify: `apps/client/vite.config.ts`
-- Create: `apps/client/.env.example`
-- Create: `apps/client/src/app/App.test.tsx`
-- Create: `apps/client/src/app/App.tsx`
-- Create: `apps/client/src/app/providers.tsx`
-- Create: `apps/client/src/lib/backend.ts`
-- Create: `apps/client/src/store/index.ts`
-- Modify: `apps/client/src/main.tsx`
-- Replace: `apps/client/src/index.css` with `apps/client/src/styles.css`
-- Create: `apps/client/src/test/setup.ts`
-- Create: `apps/client/wrangler.jsonc`
-- Delete: generated Vite demo assets and styles that are no longer imported
+**Files:** generated shadcn/Tailwind files, Client-side providers, Backend health client, placeholder application, Static Assets configuration.
 
-**Interfaces:**
-- Consumes: `GET /health` from Task 2 and `VITE_API_BASE_URL`.
-- Produces: an accessible placeholder status screen that reports Backend connectivity; a static-assets deployment artifact in `apps/client/dist`.
+**Consumes:** `GET /health` and `VITE_API_BASE_URL`.
 
-- [ ] **Step 1: Install Client-side runtime and local test dependencies**
+- [ ] **Step 1: Apply the supplied shadcn preset**
 
-Run:
+Run from `apps/client`:
+
+```bash
+pnpm dlx shadcn@latest apply --preset b7C9wSzj6
+```
+
+Keep the Tailwind and global stylesheet output generated by this command. Do not replace it with a custom `styles.css`.
+
+- [ ] **Step 2: Install the remaining application dependencies**
 
 ```bash
 pnpm --dir apps/client add @reduxjs/toolkit @tanstack/react-query react-redux
-pnpm --dir apps/client add -D @tailwindcss/vite tailwindcss vitest jsdom @testing-library/react @testing-library/jest-dom
 ```
 
-Add scripts to `apps/client/package.json`:
+Add `"deploy": "wrangler deploy"` to the existing Client-side scripts.
 
-```json
-{
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "test": "vitest run",
-    "deploy": "wrangler deploy"
-  }
-}
-```
-
-- [ ] **Step 2: Write the failing connectivity behavior test**
-
-Create `apps/client/src/test/setup.ts`:
-
-```typescript
-import "@testing-library/jest-dom/vitest";
-```
-
-Create `apps/client/src/app/App.test.tsx` using the real providers and a boundary-level `fetch` stub:
-
-```tsx
-import { render, screen } from "@testing-library/react";
-import { afterEach, expect, test, vi } from "vitest";
-
-import { AppProviders } from "./providers";
-import { App } from "./App";
-
-afterEach(() => vi.unstubAllGlobals());
-
-test("reports when Backend is connected", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: "ok", service: "backend" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    ),
-  );
-
-  render(
-    <AppProviders>
-      <App />
-    </AppProviders>,
-  );
-
-  expect(await screen.findByRole("status")).toHaveTextContent("Backend connected");
-});
-```
-
-This catches a missing health request, a broken provider tree, or failure to expose the successful connection state.
-
-- [ ] **Step 3: Run the Client-side test and verify RED**
-
-Run:
-
-```bash
-pnpm --dir apps/client test
-```
-
-Expected: the test fails because `App` and `AppProviders` do not yet implement the contract.
-
-- [ ] **Step 4: Implement typed Backend access and providers**
+- [ ] **Step 3: Add typed Backend connectivity**
 
 Create `apps/client/src/lib/backend.ts`:
 
@@ -481,12 +312,18 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8787";
 
 export async function getBackendHealth(): Promise<BackendHealth> {
   const response = await fetch(`${apiBaseUrl}/health`);
-  if (!response.ok) {
-    throw new Error(`Backend health request failed with ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`Backend health request failed with ${response.status}`);
   return response.json() as Promise<BackendHealth>;
 }
 ```
+
+Create `apps/client/.env.example`:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8787
+```
+
+- [ ] **Step 4: Add Query and Redux providers**
 
 Create `apps/client/src/store/index.ts`:
 
@@ -520,7 +357,9 @@ export function AppProviders({ children }: PropsWithChildren) {
 }
 ```
 
-- [ ] **Step 5: Implement the placeholder status screen**
+Do not create placeholder slices or fetched-data state in Redux.
+
+- [ ] **Step 5: Replace the Vite demo with one status screen**
 
 Create `apps/client/src/app/App.tsx`:
 
@@ -534,13 +373,13 @@ export function App() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-16">
-      <section className="w-full rounded-3xl border border-slate-800 bg-slate-900 p-10 shadow-2xl">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-cyan-400">Voice Agent Platform</p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">Platform foundation</h1>
-        <p className="mt-4 max-w-xl text-slate-300">
-          The Client-side and Backend are running. Agent experiences will be added in focused implementation phases.
+      <section className="w-full rounded-xl border bg-card p-8 text-card-foreground shadow-sm">
+        <p className="text-sm font-medium text-muted-foreground">Voice Agent Platform</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Platform foundation</h1>
+        <p className="mt-3 text-muted-foreground">
+          Client-side and Backend are running. Agent experiences will be added separately.
         </p>
-        <p className="mt-8 text-sm text-slate-200" role="status">
+        <p className="mt-6 text-sm" role="status">
           {health.isPending && "Checking Backend…"}
           {health.isSuccess && "Backend connected"}
           {health.isError && "Backend unavailable"}
@@ -559,7 +398,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app/App";
 import { AppProviders } from "./app/providers";
-import "./styles.css";
+import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -570,51 +409,9 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-- [ ] **Step 6: Configure Tailwind, Vitest, and browser styles**
+Delete unused Vite demo assets only.
 
-Update `apps/client/vite.config.ts`:
-
-```typescript
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  test: {
-    environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
-  },
-});
-```
-
-Create `apps/client/src/styles.css`:
-
-```css
-@import "tailwindcss";
-
-:root {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #e2e8f0;
-  background: #020617;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
-```
-
-Create `apps/client/.env.example`:
-
-```dotenv
-VITE_API_BASE_URL=http://localhost:8787
-```
-
-- [ ] **Step 7: Configure Static Assets deployment**
+- [ ] **Step 6: Configure Static Assets deployment**
 
 Create `apps/client/wrangler.jsonc`:
 
@@ -630,69 +427,46 @@ Create `apps/client/wrangler.jsonc`:
 }
 ```
 
-- [ ] **Step 8: Verify GREEN and build output**
-
-Run:
+- [ ] **Step 7: Verify Client-side and end-to-end local operation**
 
 ```bash
-pnpm --dir apps/client test
 pnpm --dir apps/client build
+pnpm dev
 ```
 
-Expected: the connectivity test passes and Vite creates `apps/client/dist` without TypeScript errors.
+Verify `http://localhost:5173`, `http://localhost:8787/health`, and that the page reaches `Backend connected`.
 
-- [ ] **Step 9: Run Client-side and Backend together**
-
-Run `pnpm dev`, open `http://localhost:5173`, and verify that the page reaches the `Backend connected` state.
-
-- [ ] **Step 10: Commit Client-side foundation**
+- [ ] **Step 8: Commit Client-side**
 
 ```bash
 git add apps/client package.json pnpm-lock.yaml
 git commit -m "feat: add placeholder client application"
 ```
 
-### Task 4: Add local Database scaffolding and production migration automation
+### Task 4: Add local Database scaffolding and migration automation
 
-**Files:**
-- Create: `supabase/config.toml`
-- Create: `supabase/seed.sql`
-- Create: `supabase/migrations/README.md`
-- Create: `.github/workflows/deploy-database.yml`
-- Modify: `package.json`
-- Modify: `pnpm-lock.yaml`
+**Files:** `supabase/*`, `.github/workflows/deploy-database.yml`, root package scripts.
 
-**Interfaces:**
-- Consumes: Supabase CLI through the root pnpm dependency.
-- Produces: root commands `db:start`, `db:stop`, `db:status`, and a serialized production migration job triggered only by migration or workflow changes on `main`.
-
-- [ ] **Step 1: Initialize local Supabase configuration**
-
-Run:
+- [ ] **Step 1: Initialize local Supabase without linking production**
 
 ```bash
 pnpm exec supabase init
 ```
 
-Expected: `supabase/config.toml` is created without starting or linking a production project.
+Keep the generated `supabase/config.toml` and `supabase/seed.sql`. Add `supabase/migrations/README.md` explaining migration ownership; do not add an application schema.
 
-- [ ] **Step 2: Add local Database scripts**
+- [ ] **Step 2: Add serialized production migration automation**
 
-Add to the root `package.json` scripts:
+Create `.github/workflows/deploy-database.yml` triggered on `main` changes under `supabase/migrations/**` or to the workflow itself. It must:
 
-```json
-{
-  "db:start": "supabase start",
-  "db:stop": "supabase stop",
-  "db:status": "supabase status"
-}
-```
+1. use `actions/checkout@v4`;
+2. use `supabase/setup-cli@v1`;
+3. run `supabase link --project-ref "$SUPABASE_PROJECT_ID"`;
+4. run `supabase db push --linked`;
+5. read `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, and `SUPABASE_PROJECT_ID` from GitHub Actions secrets;
+6. use concurrency group `production-database-migrations` with cancellation disabled.
 
-Create an empty `supabase/seed.sql` with a comment explaining that domain seed data is added with the agent designs. Create `supabase/migrations/README.md` explaining that timestamped SQL migrations live in this directory and are applied automatically after merge.
-
-- [ ] **Step 3: Add the deployment-only production migration workflow**
-
-Create `.github/workflows/deploy-database.yml`:
+Use this workflow:
 
 ```yaml
 name: Deploy database
@@ -729,39 +503,31 @@ jobs:
         run: supabase db push --linked
 ```
 
-- [ ] **Step 4: Validate configuration without touching production**
-
-Run:
+- [ ] **Step 3: Verify only the local Database**
 
 ```bash
 pnpm exec supabase --version
-pnpm exec supabase start
-pnpm exec supabase status
-pnpm exec supabase stop
+pnpm db:start
+pnpm db:status
+pnpm db:stop
 ```
 
-Expected: the local stack starts and stops if Docker is available. If Docker is absent or stopped, report that prerequisite; do not substitute a production project.
+If Docker is unavailable, report it as a local prerequisite. Do not connect local CLI commands to production.
 
-- [ ] **Step 5: Commit Database foundation**
+- [ ] **Step 4: Commit Database scaffolding**
 
 ```bash
 git add package.json pnpm-lock.yaml supabase .github/workflows/deploy-database.yml
 git commit -m "chore: add database migration foundation"
 ```
 
-### Task 5: Document and configure external deployment handoff
+### Task 5: Document deployment and perform final local verification
 
-**Files:**
-- Modify: `README.md`
-- Modify: `docs/architecture/deployment-and-operations.md` only if an initialization discovery changes an approved operational detail.
+**Files:** `README.md`; architecture documentation only if implementation discovery changes an approved detail.
 
-**Interfaces:**
-- Consumes: the runnable applications and deployment files from Tasks 1–4.
-- Produces: exact manual account and dashboard steps required to activate automatic production deployment.
+- [ ] **Step 1: Document local setup**
 
-- [ ] **Step 1: Document local startup**
-
-Add commands and prerequisites to README:
+Document:
 
 ```bash
 pnpm install
@@ -770,74 +536,51 @@ cp apps/client/.env.example apps/client/.env.local
 pnpm dev
 ```
 
-Document Client-side at `http://localhost:5173`, Backend at `http://localhost:8787`, and Backend health at `http://localhost:8787/health`.
+- [ ] **Step 2: Document direct Wrangler deployment**
 
-- [ ] **Step 2: Document the GitHub prerequisite**
+After the user authenticates:
 
-Record that the user must choose a repository owner/name and visibility, create or authorize the remote repository, and push `main`. The current local repository has no Git remote, although GitHub CLI is authenticated.
+```bash
+npx wrangler login
+npx wrangler whoami
+pnpm --dir apps/client build
+pnpm --dir apps/client exec wrangler deploy
+uv run --directory apps/backend pywrangler deploy
+```
 
-- [ ] **Step 3: Document the two Cloudflare Workers Builds connections**
+The first deploy creates `voice-agent-client` and `voice-agent-backend` and returns their generated `workers.dev` URLs. Set Client-side production build variable `VITE_API_BASE_URL` to the Backend URL, then redeploy Client-side.
 
-After the user runs `npx wrangler login` and authorizes the account, connect the same GitHub repository to two Workers Builds projects:
+- [ ] **Step 3: Document automatic Cloudflare deployment**
+
+After the user creates and pushes the GitHub repository, connect it to each Worker in Cloudflare Workers Builds:
 
 | Setting | Client-side | Backend |
 | --- | --- | --- |
-| Worker name | `voice-agent-client` | `voice-agent-backend` |
 | Production branch | `main` | `main` |
 | Root directory | `apps/client` | `apps/backend` |
 | Build command | `pnpm install --frozen-lockfile && pnpm build` | `pnpm install --frozen-lockfile && uv sync --locked` |
 | Deploy command | `pnpm exec wrangler deploy` | `uv run pywrangler deploy` |
 | Watch paths | `apps/client/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` | `apps/backend/**` |
 
-Configure Client-side build variable `VITE_API_BASE_URL` to the generated Backend Worker URL. The two watch-path sets enforce independent deployment.
+- [ ] **Step 4: Document production Supabase activation**
 
-- [ ] **Step 4: Document Supabase production activation**
-
-The user creates a Supabase project and adds these GitHub Actions secrets:
+After the user creates the Supabase project, add these GitHub Actions secrets:
 
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_DB_PASSWORD`
 - `SUPABASE_PROJECT_ID`
 
-The local CLI remains unlinked to production. Migrations run only in GitHub Actions after relevant files merge to `main`.
-
-- [ ] **Step 5: Document deferred inputs**
-
-Record that shadcn/ui initialization waits for the user's preset. ElevenLabs account configuration and secrets wait for the session-admission implementation phase; neither is needed for the placeholder deployment.
-
-- [ ] **Step 6: Run the full local verification suite**
-
-Run:
+- [ ] **Step 5: Run final local verification**
 
 ```bash
-pnpm test
 pnpm build
 pnpm --dir apps/client exec wrangler deploy --dry-run
-uv run --directory apps/backend pytest
-```
-
-Start `pnpm dev`, then verify:
-
-```bash
-curl --fail --silent http://localhost:8787/health
-curl --fail --silent http://localhost:5173
-```
-
-Expected: tests pass, the production Client-side bundle builds, Wrangler accepts the Static Assets project, both local HTTP endpoints respond, and the browser status reaches `Backend connected`.
-
-- [ ] **Step 7: Verify repository scope and commit documentation**
-
-Run:
-
-```bash
-git status --short
 git diff --check
-rg -n "TODO|TBD" apps supabase .github README.md
 ```
 
-Expected: only intended initialization files are changed, patch formatting is clean, and no hidden implementation placeholders remain.
+Start `pnpm dev`, then verify both HTTP endpoints with `curl` and inspect the Client-side page in a browser. No automated tests are required for this placeholder foundation.
 
-Commit:
+- [ ] **Step 6: Commit the setup documentation**
 
 ```bash
 git add README.md docs/architecture/deployment-and-operations.md
@@ -846,15 +589,13 @@ git commit -m "docs: add project setup and deployment handoff"
 
 ## External completion boundary
 
-Local initialization is complete when Client-side and Backend run together, local tests pass, Client-side builds, the local Database configuration exists, and deployment configuration validates without production credentials.
+Codex can complete and verify the local scaffold without external accounts. Production deployment requires the user to:
 
-Production deployment is complete only after the user provides or performs these external actions:
+1. create the GitHub repository, add it as the Git remote, and push `main`;
+2. create the Supabase project and add its three GitHub Actions secrets;
+3. run `npx wrangler login` and authorize the intended Cloudflare account;
+4. either allow Codex to run the direct deploy commands or run them manually;
+5. connect both Workers to the GitHub repository in Cloudflare Workers Builds;
+6. provide the generated Backend URL for `VITE_API_BASE_URL` and verify the automatic deployments.
 
-1. Provide the shadcn preset, or explicitly defer shadcn initialization beyond this foundation.
-2. Choose the GitHub repository owner/name and public/private visibility, then authorize creation or add a remote.
-3. Run `npx wrangler login` and select the intended Cloudflare account.
-4. Connect both Workers Builds projects to the GitHub repository with the documented roots, commands, branches, and watch paths.
-5. Create the Supabase production project and add the three GitHub Actions secrets.
-6. Push or merge the initialized repository to `main` and verify both Cloudflare deployments and the Database workflow.
-
-No ElevenLabs account action is required until agent and session work begins.
+ElevenLabs setup remains deferred until session admission work begins.
