@@ -219,9 +219,9 @@ consume ElevenLabs call credits.
 
 ## Related documents
 
-- [Product Requirements](../../requirements/product-requirements.md)
-- [Platform Architecture and Session Lifecycle](../../architecture/platform-foundation.md)
-- [Deployment and Operations](../../architecture/deployment-and-operations.md)
-- [Technology Stack](../../technology/stack.md)
-- [ADR 0001: Use ElevenLabs](../../decisions/0001-use-elevenlabs-managed-voice-runtime.md)
-- [ADR 0002: Gate private sessions through Backend](../../decisions/0002-gate-private-elevenlabs-sessions-through-backend.md)
+- [Product Requirements](../requirements/product-requirements.md)
+- [Platform Architecture and Session Lifecycle](../architecture/platform-foundation.md)
+- [Deployment and Operations](../architecture/deployment-and-operations.md)
+- [Technology Stack](../technology/stack.md)
+- [ADR 0001: Use ElevenLabs](../decisions/0001-use-elevenlabs-managed-voice-runtime.md)
+- [ADR 0002: Gate private sessions through Backend](../decisions/0002-gate-private-elevenlabs-sessions-through-backend.md)

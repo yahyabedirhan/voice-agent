@@ -43,7 +43,7 @@ types, inheritance, or a generic agent builder.
 - [Platform architecture and session lifecycle](docs/architecture/platform-foundation.md)
 - [Deployment and operations](docs/architecture/deployment-and-operations.md)
 - [Technology stack](docs/technology/stack.md)
-- [Approved platform design](docs/superpowers/specs/2026-08-12-voice-agent-platform-design.md)
+- [Approved platform design](docs/specs/2026-08-12-voice-agent-platform-design.md)
 
 ## Active research
 
