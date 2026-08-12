@@ -25,16 +25,15 @@ We compared three approaches:
 
 Use ElevenLabs Agents as the managed voice runtime.
 
-The browser will connect to ElevenLabs using its React SDK and WebRTC support.
-FastAPI will act as the application control plane: it will expose the enabled
-catalog, select the configured private agent, issue protected conversation
-credentials, receive post-conversation webhooks, and persist application
-records.
+Client-side will connect directly to ElevenLabs. Backend will act as the
+application control plane: it will expose the enabled catalog, select the
+configured private agent, issue protected conversation credentials, receive
+post-conversation webhooks, and persist application records.
 
-The agent catalog will be code-defined in FastAPI. Supabase/PostgreSQL
-will store application session metadata and business events. ElevenLabs will be
-the source of truth for provider-side conversation history and transcripts,
-subject to retention settings that must be reviewed before deployment.
+The agent catalog will be code-defined in Backend. Database will store session
+metadata and business events. ElevenLabs will be the source of truth for
+provider-side conversation history and transcripts, subject to retention
+settings that must be reviewed before deployment.
 
 ## Why
 
@@ -52,14 +51,14 @@ build correctly:
 - testing, analytics, and OpenTelemetry trace export.
 
 Purchasing a managed service lets us spend time on product and domain behavior:
-selecting an agent, defining two different task-oriented
-conversations, connecting business capabilities, and learning how voice agents
-are configured and evaluated.
+selecting an agent, defining two different task-oriented conversations,
+connecting business capabilities, and learning how voice agents are configured
+and evaluated.
 
 ## What we do not need to build
 
-- A browser-to-FastAPI audio streaming protocol.
-- A FastAPI-to-model realtime audio connection.
+- A Client-side-to-Backend audio streaming protocol.
+- A Backend-to-model realtime audio connection.
 - WebRTC signaling and media transport.
 - Audio codecs, buffering, playback, and jitter handling.
 - Voice activity detection and end-of-turn detection.
@@ -79,10 +78,10 @@ Avoiding these components is the main value purchased from ElevenLabs.
 - Admission control for anonymous voice sessions.
 - Deciding which agent a user may start.
 - Prompt, safety, escalation, and domain-knowledge quality.
-- FastAPI endpoints for protected conversation credentials.
+- Backend endpoints for protected conversation credentials.
 - Webhook authentication, idempotency, and error handling.
 - The application-owned session and business-event model.
-- Business tools and integrations exposed through FastAPI.
+- Business tools and integrations exposed through the Backend.
 - Privacy disclosures and retention configuration.
 - Tests for product logic and critical agent behavior.
 - Deployment, monitoring, and cost controls for our own services.
@@ -96,7 +95,7 @@ Avoiding these components is the main value purchased from ElevenLabs.
 - Strong voice selection and configurable conversational behavior.
 - Built-in history, analysis, testing, and observability surfaces.
 - The LLM can still be selected or replaced without rebuilding the audio layer.
-- FastAPI remains useful for business logic without carrying realtime audio.
+- Backend remains useful for business logic without carrying realtime audio.
 
 ### Costs and limitations
 
@@ -116,7 +115,7 @@ Keep our application boundary provider-neutral:
 - Store our own stable agent IDs and map them to ElevenLabs agent IDs.
 - Persist normalized application sessions and business events rather than
   exposing raw ElevenLabs payloads throughout the application.
-- Put business actions behind FastAPI APIs instead of provider-only logic.
+- Put business actions behind Backend APIs instead of provider-only logic.
 - Isolate conversation creation and webhook translation behind a voice-provider
   adapter.
 

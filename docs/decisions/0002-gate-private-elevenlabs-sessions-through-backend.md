@@ -1,4 +1,4 @@
-# ADR 0002: Gate Private ElevenLabs Sessions Through FastAPI
+# ADR 0002: Gate Private ElevenLabs Sessions Through the Backend
 
 - Status: Accepted
 - Date: 2026-08-12
@@ -13,20 +13,20 @@ to allow or block new sessions for an individual agent.
 
 ## Decision
 
-Deploy both ElevenLabs agents as private agents. FastAPI will be the admission
-control layer for every new voice session.
+Deploy both ElevenLabs agents as private agents. Backend will be the
+admission-control layer for every new voice session.
 
-The Python service will own a flat, code-defined registry containing each
-stable application agent ID, public catalog metadata, enabled state, and private
+Backend will own a flat, code-defined registry containing each stable
+application agent ID, public catalog metadata, enabled state, and private
 ElevenLabs agent mapping.
 
-React will retrieve enabled public metadata through `GET /agents`. To prepare a
-call, React will send the selected stable agent ID to the conceptual
-`POST /sessions` endpoint. FastAPI will validate the enabled state, create an
-anonymous application session, request a short-lived ElevenLabs WebRTC
-conversation token, and return that token to React.
+Client-side will retrieve enabled public metadata through `GET /agents`. To
+prepare a call, it will send the selected stable agent ID to the conceptual
+`POST /sessions` endpoint. Backend will validate the enabled state, create an
+anonymous application session, request a short-lived ElevenLabs conversation
+token, and return that token to Client-side.
 
-React then connects directly to ElevenLabs. FastAPI does not proxy audio.
+Client-side then connects directly to ElevenLabs. Backend does not proxy audio.
 
 ## Consequences
 
@@ -37,12 +37,12 @@ React then connects directly to ElevenLabs. FastAPI does not proxy audio.
 - An agent can be removed from the catalog and blocked from new sessions with a
   code-level enabled switch.
 - Future rate limiting, CAPTCHA, maintenance mode, or other admission controls
-  have a clear enforcement point.
+  have a clear enforcement point in the Backend.
 - The application creates its own session before paid provider usage begins.
 
 ### Costs and limitations
 
-- Starting a call requires an extra request to FastAPI.
+- Starting a call requires an extra request to Backend.
 - Token issuance adds another external request and possible failure mode.
 - Anonymous access means the token endpoint still needs abuse protection if the
   demo is exposed broadly.
@@ -53,11 +53,11 @@ React then connects directly to ElevenLabs. FastAPI does not proxy audio.
 
 ### Public ElevenLabs agents
 
-React could start a session directly with an ElevenLabs agent ID. This is
-simpler, but it permits callers to bypass FastAPI and removes the application's
+Client-side could start a session directly with an ElevenLabs agent ID. This is
+simpler, but it permits callers to bypass Backend and removes the application's
 quick admission-control switch.
 
-### Proxy realtime audio through FastAPI
+### Proxy realtime audio through the Backend
 
 This would provide deeper control but would reintroduce realtime transport,
 buffering, scaling, and latency concerns that selecting ElevenLabs was intended

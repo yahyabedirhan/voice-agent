@@ -36,7 +36,7 @@ checkpoint. They will be designed after the overall architecture is approved.
 
 ## User requirements
 
-- Users can view a small catalog of enabled agents.
+- Users can view a catalog of enabled agents.
 - Users can select one agent and begin a voice conversation.
 - No account or sign-in is required.
 - The browser asks for microphone permission before starting a call.
@@ -64,13 +64,13 @@ checkpoint. They will be designed after the overall architecture is approved.
 ## Administrator and developer requirements
 
 - A custom administrator interface is not required.
-- Developers can enable or disable catalog agents in the Python service.
+- Developers can enable or disable catalog agents in Backend.
 - Developers inspect transcripts and conversation history in ElevenLabs.
-- Developers inspect application sessions and business events in Supabase.
+- Developers inspect application sessions and business events in Database.
 - Disabling an agent blocks new sessions only; calls already in progress
   continue normally.
-- The system retains enough provider and application identifiers to correlate a
-  Supabase session with its ElevenLabs conversation.
+- The system retains enough provider and application identifiers to correlate
+  an application session with its ElevenLabs conversation.
 
 ## Data requirements
 
@@ -91,10 +91,9 @@ checkpoint. They will be designed after the overall architecture is approved.
 - Application-specific business events and structured outcomes produced by
   agent capabilities
 
-The application does not copy transcripts or audio into Supabase. A
-post-call webhook may contain transcript data in transit, but the application
-extracts only required identifiers and metadata and does not persist that
-transcript.
+The application does not copy transcripts or audio into Database. A post-call
+webhook may contain transcript data in transit, but the application extracts
+only required identifiers and metadata and does not persist that transcript.
 
 ## Out of scope
 
@@ -117,10 +116,10 @@ transcript.
 - Both agents appear as independent catalog entries.
 - An anonymous user can start and end a browser voice session with either
   enabled agent.
-- FastAPI can prevent new sessions for a disabled agent.
-- Voice media does not pass through FastAPI.
+- Backend can prevent new sessions for a disabled agent.
+- Voice media does not pass through Backend.
 - Each completed connection can be correlated between the application and
   ElevenLabs.
 - ElevenLabs provides the transcript inspection surface.
-- Supabase retains application session metadata and any application-owned
-  business events without storing transcripts or audio.
+- Database retains session metadata and any application-owned business events
+  without storing transcripts or audio.

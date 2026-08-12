@@ -12,38 +12,37 @@ the stated scope unless explicitly noted otherwise.
 
 ```mermaid
 flowchart LR
-    U["Anonymous user"] --> R["React web application"]
+    U["Anonymous user"] --> C["Client-side"]
 
-    R -->|"Catalog, admission, and session metadata"| F["FastAPI control plane"]
-    R <-->|"Realtime WebRTC voice session"| E["ElevenLabs Agents"]
+    C -->|"Catalog, admission, and session metadata"| B["Backend"]
+    C <-->|"Realtime voice session"| E["ElevenLabs Agents"]
 
-    F -->|"Sessions and application events"| S["Supabase PostgreSQL"]
+    B -->|"Sessions and application events"| DB["Database"]
     E -->|"Transcripts and conversation history"| D["ElevenLabs dashboard"]
 
-    E -.->|"Agent tool requests; detailed design follows"| F
-    F -.->|"Future agent-specific integrations"| X["External services"]
+    E -.->|"Agent tool requests; detailed design follows"| B
+    B -.->|"Future agent-specific integrations"| X["External services"]
 
-    A["Developer or administrator"] --> C["Python agent registry"]
+    A["Developer or administrator"] --> G["Agent registry"]
     A --> D
-    A --> S
+    A --> DB
 ```
 
 ## Component responsibilities
 
-### React web application
+### Client-side
 
 - Fetch public catalog metadata from `GET /agents`.
 - Present enabled agents to the user.
 - Request microphone permission.
-- Ask FastAPI to authorize and prepare a session.
-- Start the ElevenLabs React SDK session using a short-lived conversation
-  token.
+- Ask Backend to authorize and prepare a session.
+- Start an ElevenLabs session using a short-lived conversation token.
 - Maintain the user-visible call state and controls.
-- Associate the ElevenLabs conversation ID returned by `startSession()` with
-  the application session.
+- Associate the ElevenLabs conversation ID returned when the session starts
+  with the application session.
 - Report immediate client-side disconnection state.
 
-### FastAPI control plane
+### Backend
 
 - Own the code-defined flat agent registry.
 - Expose public catalog metadata without provider credentials or internal
@@ -53,12 +52,12 @@ flowchart LR
 - Create anonymous application sessions.
 - Use the server-side ElevenLabs API key to request short-lived WebRTC
   conversation tokens.
-- Persist application session metadata and business events through Supabase.
+- Persist application session metadata and business events in Database.
 - Receive and authenticate post-call ElevenLabs webhooks.
 - Reconcile final provider metadata without persisting transcripts or audio.
 - Provide the future boundary for agent-specific tools and integrations.
 
-FastAPI is not in the realtime media path.
+Backend is not in the realtime media path.
 
 ### ElevenLabs Agents
 
@@ -66,12 +65,12 @@ FastAPI is not in the realtime media path.
 - Establish the browser WebRTC session from a server-issued token.
 - Provide speech recognition, LLM orchestration, speech synthesis, turn-taking,
   interruption handling, and conversation termination.
-- Return a globally unique ElevenLabs conversation ID to the React SDK.
+- Return a globally unique ElevenLabs conversation ID to Client-side.
 - Retain provider-side transcripts and conversation history for developer
   inspection.
-- Send configured post-call lifecycle information to FastAPI.
+- Send configured post-call lifecycle information to Backend.
 
-### Supabase PostgreSQL
+### Database
 
 - Store anonymous application sessions.
 - Store the mapping between stable application agent IDs and individual
@@ -84,14 +83,15 @@ FastAPI is not in the realtime media path.
 
 The platform does not have a custom administrator application. Developers use:
 
-- the Python service to modify catalog metadata and enabled switches;
+- Backend configuration to modify catalog metadata and enabled switches;
 - the ElevenLabs dashboard for agent configuration, transcripts, and provider
   history;
-- the Supabase dashboard for application sessions and business events.
+- the database administration surface for application sessions and business
+  events.
 
 ## Agent catalog
 
-The catalog is a flat, code-defined registry in the Python service. Each public
+The catalog is a flat, code-defined registry owned by Backend. Each public
 entry includes only presentation and selection metadata, for example:
 
 ```json
@@ -108,13 +108,13 @@ Internal registry data also maps the stable `id` to its private ElevenLabs
 agent ID. Internal provider identifiers and credentials are not returned by
 `GET /agents`.
 
-`GET /agents` returns enabled agents only. FastAPI repeats the enabled check
-when a session is requested, so a stale browser catalog cannot bypass the
+`GET /agents` returns enabled agents only. Backend repeats the enabled check
+when a session is requested, so a stale Client-side catalog cannot bypass the
 control switch.
 
-Using Supabase as a dynamic agent catalog and building an admin management UI
-are deferred. FastAPI remains the catalog API boundary, so the storage
-implementation can change later without changing React.
+Using Database as a dynamic agent catalog and building an admin management UI
+are deferred. Backend remains the catalog API boundary, so the storage
+implementation can change later without changing Client-side.
 
 ## Session initialization boundary
 
@@ -125,75 +125,75 @@ Its agreed responsibilities are:
 
 1. Accept the stable public application agent ID.
 2. Validate that the agent exists and is enabled.
-3. Create an anonymous application session in Supabase.
+3. Create an anonymous application session in Database.
 4. Resolve the private ElevenLabs agent ID internally.
 5. Request a short-lived WebRTC conversation token from ElevenLabs.
-6. Return the application session ID and conversation token to React.
+6. Return the application session ID and conversation token to Client-side.
 
-The exact request and response schema will be finalized when the React SDK and
-backend integration are implemented. This is an intentionally deferred API
-detail, not an undecided system responsibility.
+The exact request and response schema will be finalized when the Client-side,
+Backend, and ElevenLabs integration are implemented. This is an intentionally
+deferred API detail, not an undecided system responsibility.
 
 ## Session lifecycle
 
 ```mermaid
 sequenceDiagram
     participant U as "Anonymous user"
-    participant R as "React"
-    participant F as "FastAPI"
-    participant S as "Supabase"
+    participant C as "Client-side"
+    participant B as "Backend"
+    participant DB as "Database"
     participant E as "ElevenLabs"
 
-    R->>F: "GET /agents"
-    F-->>R: "Enabled public agent metadata"
+    C->>B: "GET /agents"
+    B-->>C: "Enabled public agent metadata"
 
-    U->>R: "Select agent"
-    R->>U: "Request microphone permission"
-    U-->>R: "Permission granted"
+    U->>C: "Select agent"
+    C->>U: "Request microphone permission"
+    U-->>C: "Permission granted"
 
-    R->>F: "POST /sessions with stable agent ID"
-    F->>F: "Validate agent and enabled switch"
-    F->>S: "Create anonymous application session"
-    F->>E: "Request private-agent WebRTC token"
-    E-->>F: "Short-lived conversation token"
-    F-->>R: "Application session ID and token"
+    C->>B: "POST /sessions with stable agent ID"
+    B->>B: "Validate agent and enabled switch"
+    B->>DB: "Create anonymous application session"
+    B->>E: "Request private-agent connection token"
+    E-->>B: "Short-lived conversation token"
+    B-->>C: "Application session ID and token"
 
-    R->>E: "startSession with conversation token"
-    E-->>R: "ElevenLabs conversation ID"
-    R->>F: "Associate provider conversation ID"
+    C->>E: "Start session with conversation token"
+    E-->>C: "ElevenLabs conversation ID"
+    C->>B: "Associate provider conversation ID"
 
-    Note over R,E: "Voice media travels directly over WebRTC"
+    Note over C,E: "Voice media travels directly"
 
-    U->>R: "User ends, or agent decides conversation is complete"
-    R->>E: "End or disconnect"
-    R->>F: "Report immediate client-side end state"
+    U->>C: "User ends, or agent decides conversation is complete"
+    C->>E: "End or disconnect"
+    C->>B: "Report immediate client-side end state"
 
-    E->>F: "Authenticated post-call webhook"
-    F->>S: "Reconcile final identifiers and metadata"
+    E->>B: "Authenticated post-call webhook"
+    B->>DB: "Reconcile final identifiers and metadata"
 ```
 
 ## Access-control behavior
 
 - Both deployed ElevenLabs agents are private.
-- The ElevenLabs API key exists only in FastAPI's server environment.
-- Anonymous access does not bypass FastAPI; every new call needs a token issued
-  through the control plane.
+- The ElevenLabs API key exists only in the Backend environment.
+- Anonymous access does not bypass Backend; every new call needs a
+  token issued through it.
 - Disabling an agent removes it from `GET /agents` and causes new session
   requests for it to be rejected.
 - Disabling an agent does not terminate an already connected conversation.
 - Rate limiting, CAPTCHA, and more advanced abuse controls can be added at the
-  FastAPI boundary later without changing the media architecture.
+  Backend boundary later without changing the media architecture.
 
 ## Data flow after disconnection
 
-The React SDK supplies immediate user-interface state through its disconnect
-callback. That signal is useful but is not sufficient as the only durable
+Client-side receives immediate disconnection state from the ElevenLabs client
+integration. That signal is useful but is not sufficient as the only durable
 lifecycle source because a browser can close or lose connectivity.
 
 ElevenLabs post-call webhooks provide a later reconciliation path. The payload
 can contain the provider conversation ID, application correlation metadata,
 status, duration, termination metadata, transcript, tool activity, and analysis.
-FastAPI stores only the identifiers and application-required metadata. It does
+Backend stores only the identifiers and application-required metadata. It does
 not store the transcript or audio.
 
 ## Deferred follow-on design
@@ -207,9 +207,16 @@ The next design phase will specify, independently for each agent:
 - completion, failure, and escalation behavior;
 - behavioral tests and evaluation criteria.
 
-The platform error-state model, webhook verification details, Supabase schema,
+The platform error-state model, webhook verification details, Database schema,
 deployment topology, and automated test plan will be finalized before an
 implementation plan is written.
+
+## Technology mapping
+
+Technology choices are documented separately in
+[Technology Stack](../technology/stack.md). This architecture uses logical
+component names so that its responsibilities remain valid if an implementation
+technology changes.
 
 ## References
 
