@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "voice-agent-backend",
+  "name": "api",
   "main": "src/worker.py",
   "compatibility_date": "2026-08-12",
   "compatibility_flags": ["python_workers", "python_dedicated_snapshot"],

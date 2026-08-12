@@ -49,6 +49,10 @@ types, inheritance, or a generic agent builder.
 
 - [ElevenLabs agent configuration and ownership boundary](docs/research/elevenlabs-agent-configuration-boundary.md)
 
+## Operations
+
+- [Production deployment](docs/deployment.md)
+
 ## Repository layout
 
 ```text
@@ -93,61 +97,3 @@ pnpm db:stop
 ```
 
 These commands target only the local Supabase stack.
-
-## Cloudflare deployment with Wrangler
-
-Authenticate once in a browser and verify the selected account:
-
-```bash
-npx wrangler login
-npx wrangler whoami
-```
-
-Deploy Backend first:
-
-```bash
-uv run --directory apps/backend pywrangler deploy
-```
-
-Copy the generated Backend `workers.dev` URL. Build Client-side against it and
-deploy the Static Assets Worker:
-
-```bash
-VITE_API_BASE_URL=https://voice-agent-backend.<account-subdomain>.workers.dev \
-  pnpm --dir apps/client build
-pnpm --dir apps/client exec wrangler deploy
-```
-
-Both first deployments create their named Workers in the authorized Cloudflare
-account. Later deployments update those Workers.
-
-## Automatic Cloudflare deployment
-
-After the GitHub repository is created and `main` is pushed, connect the same
-repository to both Workers using Cloudflare Workers Builds.
-
-| Setting | Client-side | Backend |
-| --- | --- | --- |
-| Production branch | `main` | `main` |
-| Root directory | `/` | `/` |
-| Build command | `pnpm install --frozen-lockfile && pnpm --dir apps/client build` | `pnpm install --frozen-lockfile && uv sync --directory apps/backend --locked` |
-| Deploy command | `pnpm --dir apps/client exec wrangler deploy` | `uv run --directory apps/backend pywrangler deploy` |
-| Watch paths | `apps/client/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` | `apps/backend/**` |
-
-Set `VITE_API_BASE_URL` in the Client-side build variables to the generated
-Backend Worker URL. Both builds start at the repository root so the shared
-lockfile is available; separate watch paths prevent a change in one application
-from redeploying the other.
-
-## Production Database migrations
-
-After creating the Supabase project, add these GitHub Actions repository
-secrets:
-
-- `SUPABASE_ACCESS_TOKEN`
-- `SUPABASE_DB_PASSWORD`
-- `SUPABASE_PROJECT_ID`
-
-[The migration workflow](.github/workflows/deploy-database.yml) runs only when
-files under `supabase/migrations` change on `main`. Local Supabase CLI commands
-remain unlinked to the production project.
