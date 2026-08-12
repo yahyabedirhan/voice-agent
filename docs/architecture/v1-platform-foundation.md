@@ -207,9 +207,11 @@ The next design phase will specify, independently for each agent:
 - completion, failure, and escalation behavior;
 - behavioral tests and evaluation criteria.
 
-The platform error-state model, webhook verification details, Database schema,
-deployment topology, and automated test plan will be finalized before an
-implementation plan is written.
+Exact API schemas, Database tables, webhook verification mechanics, and
+agent-specific behavior will be resolved in focused implementation or agent
+design work. Deployment topology is defined in
+[Deployment and Operations](deployment-and-operations.md). Automated CI tests
+are not part of the deployment model.
 
 ## Technology mapping
 
@@ -217,6 +219,9 @@ Technology choices are documented separately in
 [Technology Stack](../technology/stack.md). This architecture uses logical
 component names so that its responsibilities remain valid if an implementation
 technology changes.
+
+Deployment choices are documented in
+[Deployment and Operations](deployment-and-operations.md).
 
 ## References
 
