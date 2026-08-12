@@ -30,14 +30,23 @@ or troubleshooting tool, but it must not be presented as the normal workflow.
 
 The same GitHub monorepo is connected to two Cloudflare projects:
 
+The account-wide Workers subdomain is `voice-agent-demo`. The two production
+URLs are therefore:
+
+- Client-side: `https://app.voice-agent-demo.workers.dev`
+- Backend: `https://api.voice-agent-demo.workers.dev`
+
 | Setting | Backend | Client-side |
 | --- | --- | --- |
 | Root directory | `apps/backend` | `apps/client` |
-| Build command | `pnpm install --frozen-lockfile && uv sync --locked` | `pnpm install --frozen-lockfile && pnpm run build` |
+| Worker name | `api` | `app` |
+| Build command | `uv sync --locked` | `pnpm run build` |
 | Deploy command | `uv run pywrangler deploy` | `pnpm exec wrangler deploy` |
 
 Each project has its own watch paths. The Client-side build variable
-`VITE_API_BASE_URL` points to the deployed Backend Worker URL.
+`VITE_API_BASE_URL` is `https://api.voice-agent-demo.workers.dev`, without a
+trailing slash. Cloudflare Workers Builds performs dependency installation
+before running the configured build command.
 
 ## Constraints
 
