@@ -39,8 +39,8 @@ types, inheritance, or a generic agent builder.
 
 ## Design checkpoint
 
-- [Product requirements](docs/requirements/v1-product-requirements.md)
-- [Platform architecture and session lifecycle](docs/architecture/v1-platform-foundation.md)
+- [Product requirements](docs/requirements/product-requirements.md)
+- [Platform architecture and session lifecycle](docs/architecture/platform-foundation.md)
 - [Deployment and operations](docs/architecture/deployment-and-operations.md)
 - [Technology stack](docs/technology/stack.md)
 - [Approved platform design](docs/superpowers/specs/2026-08-12-voice-agent-platform-design.md)

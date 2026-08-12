@@ -219,8 +219,8 @@ consume ElevenLabs call credits.
 
 ## Related documents
 
-- [Product Requirements](../../requirements/v1-product-requirements.md)
-- [Platform Architecture and Session Lifecycle](../../architecture/v1-platform-foundation.md)
+- [Product Requirements](../../requirements/product-requirements.md)
+- [Platform Architecture and Session Lifecycle](../../architecture/platform-foundation.md)
 - [Deployment and Operations](../../architecture/deployment-and-operations.md)
 - [Technology Stack](../../technology/stack.md)
 - [ADR 0001: Use ElevenLabs](../../decisions/0001-use-elevenlabs-managed-voice-runtime.md)
