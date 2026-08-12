@@ -5,11 +5,11 @@
 
 ## Context
 
-The project needs a browser-based voice agent that can support multiple
-field-service domains. A user selects an agent, explains an issue by voice, and
-receives diagnostic questions and instructions. Administrators need durable
-text transcripts and enough information to judge whether the interaction was
-helpful. Our application does not need to retain audio.
+The project needs a browser-based platform for multiple task-oriented voice
+agents. A user selects an agent and completes a domain-specific task through a
+voice-first conversation. Developers need provider-side transcripts and enough
+application metadata to correlate conversations and business events. Our
+application does not need to retain audio or transcripts in v1.
 
 The project is a demo and learning exercise. Simplicity and speed of delivery
 matter more than scale or owning every layer of the voice stack.
@@ -25,14 +25,15 @@ We compared three approaches:
 Use ElevenLabs Agents as the managed voice runtime for v1.
 
 The browser will connect to ElevenLabs using its React SDK and WebRTC support.
-FastAPI will act as the application control plane: it will select the configured
-agent, issue protected conversation credentials, receive post-conversation
-webhooks, persist application records, and expose administrator APIs.
+FastAPI will act as the application control plane: it will expose the enabled
+catalog, select the configured private agent, issue protected conversation
+credentials, receive post-conversation webhooks, and persist application
+records.
 
-Supabase/PostgreSQL will be the durable application source of truth for agent
-catalog entries, sessions, finalized transcripts, and evaluation results.
-ElevenLabs may also retain its own provider-side conversation history, subject
-to retention settings that must be reviewed before deployment.
+The agent catalog will be code-defined in FastAPI for v1. Supabase/PostgreSQL
+will store application session metadata and business events. ElevenLabs will be
+the v1 source of truth for provider-side conversation history and transcripts,
+subject to retention settings that must be reviewed before deployment.
 
 ## Why
 
@@ -50,9 +51,9 @@ build correctly:
 - testing, analytics, and OpenTelemetry trace export.
 
 Purchasing a managed service lets us spend the first version on product and
-domain behavior: choosing an agent, defining safe diagnostic conversations,
-building the administrator experience, and learning how voice agents are
-configured and evaluated.
+domain behavior: selecting an agent, defining two different task-oriented
+conversations, connecting business capabilities, and learning how voice agents
+are configured and evaluated.
 
 ## What we do not need to build in v1
 
@@ -73,14 +74,13 @@ Avoiding these components is the main value purchased from ElevenLabs.
 
 ## What remains our responsibility
 
-- The product experience and field-service agent catalog.
-- User and administrator authentication and authorization.
+- The product experience and code-defined agent catalog.
+- Admission control for anonymous voice sessions.
 - Deciding which agent a user may start.
 - Prompt, safety, escalation, and domain-knowledge quality.
 - FastAPI endpoints for protected conversation credentials.
 - Webhook authentication, idempotency, and error handling.
-- The application-owned session and transcript model.
-- The protected administrator transcript interface.
+- The application-owned session and business-event model.
 - Business tools and integrations exposed through FastAPI.
 - Privacy disclosures and retention configuration.
 - Tests for product logic and critical agent behavior.
@@ -113,8 +113,8 @@ Avoiding these components is the main value purchased from ElevenLabs.
 Keep our application boundary provider-neutral:
 
 - Store our own stable agent IDs and map them to ElevenLabs agent IDs.
-- Persist normalized session and transcript records rather than exposing raw
-  ElevenLabs payloads throughout the application.
+- Persist normalized application sessions and business events rather than
+  exposing raw ElevenLabs payloads throughout the application.
 - Put business actions behind FastAPI APIs instead of provider-only logic.
 - Isolate conversation creation and webhook translation behind a voice-provider
   adapter.

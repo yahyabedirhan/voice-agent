@@ -52,7 +52,7 @@ Best for initial exploration and manual iteration:
 - configure security, secrets, and provider retention.
 
 The dashboard is the easiest place to learn the ElevenLabs mental model and
-build the first working field-service agent.
+build the first working task-oriented agent.
 
 ### CLI and repository configuration
 
@@ -114,11 +114,11 @@ input.
 
 ### Our application owns
 
-- the public catalog of field-service agent types;
+- the flat public catalog of independently configured agents;
 - stable internal agent IDs and their ElevenLabs ID mapping;
 - access control and conversation authorization;
-- user-facing and administrator-facing interfaces;
-- durable normalized transcripts and evaluations;
+- the user-facing interface;
+- durable application sessions and business events;
 - domain APIs and business rules behind tools;
 - privacy, retention, auditing, and application-level observability.
 
@@ -130,24 +130,22 @@ business records.
 
 1. Build the first narrow agent in the ElevenLabs dashboard.
 2. Test it manually and define a small behavioral test suite.
-3. Pull the working agent, tools, and tests into the repository with the CLI.
-4. Treat the repository as the reviewable source of truth from that point.
-5. Use the dashboard for experiments, but pull and review successful changes
-   before pushing further repository changes.
-6. Use dynamic variables for session-specific context.
-7. Keep domain actions behind authenticated FastAPI webhook tools.
-8. Use the API for runtime conversation tokens and CI/CD automation.
+3. Decide the configuration source-of-truth workflow after the two agent
+   designs make the required configuration surface concrete.
+4. Use dynamic variables for session-specific context.
+5. Keep domain actions behind controlled application boundaries.
+6. Use the API for private-agent runtime conversation tokens.
 
-We should not run `elevenlabs agents init` until the first agent domain and its
+We should not run `elevenlabs agents init` until both agent designs and their
 minimum behavior are selected; otherwise the generated configuration would
 encode decisions that have not yet been made.
 
 ## Open decisions
 
-- Which field-service domain is the first vertical slice?
-- Do we create one ElevenLabs agent per domain or one workflow with specialists?
+- What are the detailed flows for the drive-through and house-painting agents?
+- Which tools and knowledge does each independent agent require?
 - Which OpenAI model should ElevenLabs invoke initially?
-- What knowledge is safe and sufficient for the first diagnostic agent?
+- What knowledge is safe and sufficient for each agent?
 - Which situations require refusal or escalation rather than instructions?
 - Which evaluation criteria define a successful conversation?
 - What provider-side transcript and audio retention settings meet the product's

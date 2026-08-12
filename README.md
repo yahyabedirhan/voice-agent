@@ -1,36 +1,54 @@
-# Field Service Voice Agent
+# Voice Agent Platform
 
-A demo platform for browser-based customer-support voice agents across multiple
-field-service domains.
+A demo platform for browser-based, task-oriented voice agents. Users choose an
+agent from a small catalog and have an anonymous, voice-first conversation.
 
-The first version prioritizes learning how a voice-agent product is assembled
-and shipping a useful end-to-end experience quickly. It does not attempt to
-rebuild realtime speech infrastructure.
+The project is inspired by the operating model of vertical AI-agent companies,
+but its v1 scope is intentionally narrow: learn how managed voice agents fit
+into a product architecture and validate the platform with two substantially
+different agents.
 
-## Current product boundary
+## V1 agents
 
-- A user selects a field-service agent and starts a browser voice session.
-- The agent asks diagnostic questions and provides safe, actionable guidance.
-- Completed conversations are transcribed for administrators.
-- End users do not receive a transcript view in v1.
-- Audio is not retained by our application.
-- Telephone calls, email, WhatsApp, bookings, payments, and CRM automation are
-  out of scope.
+- Drive-through ordering agent
+- House-painting service agent
+
+These are independent agents. V1 does not introduce shared agent types,
+inheritance, or a generic agent builder.
+
+## Product boundary
+
+- Users do not sign in.
+- The React application retrieves enabled agent metadata from FastAPI.
+- A session starts after the user selects an agent and grants microphone access.
+- Users and agents can both end a conversation.
+- The post-call screen only reports that the session ended.
+- ElevenLabs owns realtime voice transport and provider-side transcripts.
+- FastAPI controls which private ElevenLabs agents may start new sessions.
+- Supabase stores application session metadata and business events, not audio or
+  transcripts.
+- No custom administrator interface is included in v1.
 
 ## Accepted decisions
 
 - [ADR 0001: Use ElevenLabs as the managed voice runtime](docs/decisions/0001-use-elevenlabs-managed-voice-runtime.md)
+- [ADR 0002: Gate private ElevenLabs sessions through FastAPI](docs/decisions/0002-gate-private-elevenlabs-sessions-through-fastapi.md)
+
+## Design checkpoint
+
+- [V1 product requirements](docs/requirements/v1-product-requirements.md)
+- [V1 platform architecture and session lifecycle](docs/architecture/v1-platform-foundation.md)
 
 ## Active research
 
 - [ElevenLabs agent configuration and ownership boundary](docs/research/elevenlabs-agent-configuration-boundary.md)
 
-## Planned application stack
+## Planned stack
 
-- React user and administrator interfaces
+- React for the user-facing web application
 - Python with FastAPI for the application control plane
 - Supabase/PostgreSQL for application-owned records
-- ElevenLabs Agents for realtime voice infrastructure
+- ElevenLabs Agents for managed realtime voice infrastructure
 
-No application code has been scaffolded yet. The project is currently in the
-design and decision-recording phase.
+No application code has been scaffolded. The project remains in design and
+decision recording.
