@@ -129,14 +129,15 @@ repository to both Workers using Cloudflare Workers Builds.
 | Setting | Client-side | Backend |
 | --- | --- | --- |
 | Production branch | `main` | `main` |
-| Root directory | `apps/client` | `apps/backend` |
-| Build command | `pnpm install --frozen-lockfile && pnpm build` | `pnpm install --frozen-lockfile && uv sync --locked` |
-| Deploy command | `pnpm exec wrangler deploy` | `uv run pywrangler deploy` |
+| Root directory | `/` | `/` |
+| Build command | `pnpm install --frozen-lockfile && pnpm --dir apps/client build` | `pnpm install --frozen-lockfile && uv sync --directory apps/backend --locked` |
+| Deploy command | `pnpm --dir apps/client exec wrangler deploy` | `uv run --directory apps/backend pywrangler deploy` |
 | Watch paths | `apps/client/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` | `apps/backend/**` |
 
 Set `VITE_API_BASE_URL` in the Client-side build variables to the generated
-Backend Worker URL. The separate roots and watch paths prevent a change in one
-application from redeploying the other.
+Backend Worker URL. Both builds start at the repository root so the shared
+lockfile is available; separate watch paths prevent a change in one application
+from redeploying the other.
 
 ## Production Database migrations
 

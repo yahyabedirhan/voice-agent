@@ -557,9 +557,9 @@ After the user creates and pushes the GitHub repository, connect it to each Work
 | Setting | Client-side | Backend |
 | --- | --- | --- |
 | Production branch | `main` | `main` |
-| Root directory | `apps/client` | `apps/backend` |
-| Build command | `pnpm install --frozen-lockfile && pnpm build` | `pnpm install --frozen-lockfile && uv sync --locked` |
-| Deploy command | `pnpm exec wrangler deploy` | `uv run pywrangler deploy` |
+| Root directory | `/` | `/` |
+| Build command | `pnpm install --frozen-lockfile && pnpm --dir apps/client build` | `pnpm install --frozen-lockfile && uv sync --directory apps/backend --locked` |
+| Deploy command | `pnpm --dir apps/client exec wrangler deploy` | `uv run --directory apps/backend pywrangler deploy` |
 | Watch paths | `apps/client/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` | `apps/backend/**` |
 
 - [ ] **Step 4: Document production Supabase activation**
