@@ -1,0 +1,19 @@
+{
+  "name": "voice-agent-platform",
+  "private": true,
+  "packageManager": "pnpm@11.8.0",
+  "scripts": {
+    "dev": "concurrently -n client,backend -c cyan,magenta \"pnpm dev:client\" \"pnpm dev:backend\"",
+    "dev:client": "pnpm --dir apps/client dev",
+    "dev:backend": "uv run --directory apps/backend pywrangler dev",
+    "build": "pnpm --dir apps/client build",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4",
+    "supabase": "^2.113.0",
+    "wrangler": "^4.120.1"
+  }
+}

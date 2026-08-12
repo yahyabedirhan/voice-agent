@@ -1,0 +1,7 @@
+packages:
+  - apps/client
+  - apps/backend
+
+allowBuilds:
+  esbuild: true
+  workerd: true
